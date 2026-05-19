@@ -1,0 +1,71 @@
+# ──────────────────────────────────────────────
+# Default values for order-processing-service
+# ──────────────────────────────────────────────
+
+replicaCount: 2
+
+image:
+  repository: acrorderprocessing.azurecr.io/order-processing-service
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+namespace: order-processing
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  className: "webapprouting.kubernetes.azure.com"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  hosts:
+    - host: ""
+      paths:
+        - path: /api/v1/orders
+          pathType: Prefix
+  tls: []
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 75
+
+probes:
+  readiness:
+    path: /actuator/health
+    port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  liveness:
+    path: /actuator/health
+    port: 8080
+    initialDelaySeconds: 60
+    periodSeconds: 15
+
+env:
+  SPRING_PROFILES_ACTIVE: "azure"
+
+# Additional environment variables (map of name -> value)
+extraEnv: {}

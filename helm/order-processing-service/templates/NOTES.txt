@@ -1,0 +1,22 @@
+🚀 Order Processing Service has been deployed!
+
+Release:   {{ .Release.Name }}
+Namespace: {{ .Values.namespace }}
+Chart:     {{ .Chart.Name }}-{{ .Chart.Version }}
+Image:     {{ .Values.image.repository }}:{{ .Values.image.tag }}
+
+To check the status of the deployment:
+
+  kubectl get pods -n {{ .Values.namespace }}
+  kubectl get svc  -n {{ .Values.namespace }}
+
+To test the service internally:
+
+  kubectl port-forward svc/{{ include "order-processing-service.fullname" . }} 8080:{{ .Values.service.port }} -n {{ .Values.namespace }}
+  curl http://localhost:8080/api/v1/orders
+
+Via APIM (replace <SUBSCRIPTION_KEY> and <TOKEN>):
+
+  curl -X GET "https://<APIM_NAME>.azure-api.net/orders/api/v1/orders" \
+    -H "Ocp-Apim-Subscription-Key: <SUBSCRIPTION_KEY>" \
+    -H "Authorization: Bearer <TOKEN>"
